@@ -1,8 +1,12 @@
 package hu.me.iit.webapps.db.service;
 
+import hu.me.iit.webapps.db.controller.PeopleDto;
 import hu.me.iit.webapps.db.repository.PeopleRepository;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
 
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -30,4 +34,29 @@ public class PeopleServiceImpl implements PeopleService {
         return new People(peopleRepository.save(people.toEntity()));
     }
 
+    @Override
+    public void delete(Long id) {
+        try{
+            peopleRepository.deleteById(id);
+        }
+        catch (EmptyResultDataAccessException ex) {
+            throw new NoSuchEntityException(id);
+        }
+    }
+    @Override
+    public People getById(Long id) {
+        Optional<hu.me.iit.webapps.db.repository.PeopleModel> optionalPeople =peopleRepository.findById(id);
+        if (optionalPeople.isEmpty()) {
+            throw new NoSuchEntityException(id);
+        }
+        return new People(peopleRepository.findById(id).get());
+    }
+
+    public void save (People people) {
+        Optional<hu.me.iit.webapps.db.repository.PeopleModel> optionalPeople =peopleRepository.findById(people.getId());
+        if (optionalPeople.isEmpty()) {
+            throw new NoSuchEntityException(people.getId());
+        }
+        peopleRepository.save(people.toEntity());
+    }
 }
